@@ -62,10 +62,12 @@ Para el ejercicio también se requiere que arroje una excepción cuando las regl
 o cálculo de puntaje no son seguidas. La implementación solo pasará las pruebas si se arroja
 la excepción y se incluye un mensaje con ella.
 
-Para este caso se deben manejar dos tipos de excepciones incluidas en python:
+Para este caso se deben manejar los siguientes tipos de excepciones incluidas en python:
 
-- IndexError  
-- ValueError
+- ValueError: Cuando los pines de un frame exceden de 10 
+- IndexError: Cuando se hace un lanzamiento extra en un frame 10 que está abierto
+- IndexError: Cuando se agregan más de 3 lanzamientos a un frame 10 que fue strike o spare
+- IndexError: Cuando se calcula el puntaje del juego sin haberlo terminado
 
 Aunque las excepciones ya vienen en python, se deben arrojar incluyendo mensajes
 significativos para el dominio de la aplicación.
