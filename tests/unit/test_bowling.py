@@ -95,12 +95,5 @@ def test_raise_exception_when_tenth_frame_with_more_than_3_rolls(game):
 
 def test_raise_exception_when_calculate_score_without_game_end(game):
     roll_many(game, 10, 2)
-    with pytest.raises(IndexError, match="There are not enough frame to calculate score"):
+    with pytest.raises(IndexError, match="There are not enough frames to calculate score"):
         game.score()
-
-
-
-
-
-
-

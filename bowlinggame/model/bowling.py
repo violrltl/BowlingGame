@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Optional
 
@@ -7,7 +8,8 @@ class Roll:
     pins: int
 
 
-class Frame:
+class Frame(ABC):
+
     def __init__(self):
         self.rolls: list[Roll] = []
         self._next_frame: Optional[Frame] = None
@@ -24,18 +26,31 @@ class Frame:
     def total_pins(self) -> int:
         return sum(roll.pins for roll in self.rolls)
 
+    def is_strike(self):
+        return self.rolls[0].pins == 10
+
+    def is_spare(self):
+        return self.rolls[0].pins + self.rolls[1].pins == 10
+
+    @abstractmethod
+    def add_roll(self, pins: int):
+        raise NotImplementedError
+
+    @abstractmethod
+    def score(self) -> int:
+        raise NotImplementedError
+
+
+class NormalFrame(Frame):
+    def __init__(self):
+        super().__init__()
+
     def add_roll(self, pins: int):
         if pins + self.total_pins > 10:
             raise ValueError("A frame's rolls cannot exceed 10 pins")
 
         if len(self.rolls) < 2:
             self.rolls.append(Roll(pins))
-
-    def is_strike(self):
-        return self.rolls[0].pins == 10
-
-    def is_spare(self):
-        return self.rolls[0].pins + self.rolls[1].pins == 10
 
     def score(self) -> int:
         points = self.total_pins
@@ -90,11 +105,11 @@ class Game:
             return Game.MAX_FRAMES - 1
 
     def _init_frames(self):
-        frame = Frame()
+        frame = NormalFrame()
 
         for i in range(9):
             if i < 8:
-                next_frame = Frame()
+                next_frame = NormalFrame()
             else:
                 next_frame = TenthFrame()
             frame.next_frame = next_frame
@@ -112,6 +127,6 @@ class Game:
 
     def score(self) -> int:
         if self.current_frame < Game.MAX_FRAMES - 1:
-            raise IndexError("There are not enough frame to calculate score")
+            raise IndexError("There are not enough frames to calculate score")
 
         return sum(frame.score() for frame in self.frames)

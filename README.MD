@@ -32,8 +32,8 @@ Acá se presenta un ejemplo de 3 frames
 
 Esto quiere decir que el puntaje actual es 48.
 
-El frame 10 en un juego es un caso especial. Si alguien logra un *strike* o un *spare*,
-entonces obtienen un lanzamiento extra (***fill ball***). El lanzamiento extra existe para
+El frame 10 en un juego es un caso especial. Si se logra un *strike* o un *spare*,
+entonces se obtiene un lanzamiento extra (***fill ball***). El lanzamiento extra existe para
 calcular el total del frame 10. Lograr un *strike* o *spare* en el lanzamiento extra no le
 da al jugador más lanzamientos extra. El valor total del frame 10 será el total de pines
 tumbados.
@@ -41,33 +41,56 @@ tumbados.
 Por ejemplo:
 
 - Para un frame 10 que tenga X 1/ (*strike* y *spare*), el valor total será 20.
-- Para un frame 10 que tenga XXX (tres *strike*), el valor total será 30.
+- Para un frame 10 que tenga XXX (tres *strikes*), el valor total será 30.
 
 ## Requisitos
-Implemente el código necesario para llevar registro del puntaje de un juego de bolos. Tenga
-en cuenta el siguiente modelo
+Implemente el código necesario para llevar registro del puntaje de un juego de bolos, teniendo
+en cuenta lo siguiente.
+
+### Modelo del mundo
 
 ![Modelo del mundo del problema](./assets/model.png)
 
-Para la implementación, lo que se va a verificar es lo que hacen los métodos de la
-clase **Game**, así que tenga en cuenta lo siguiente:
-
-- `roll(pins: int)` este método es llamado cada vez que un jugador lanza una bola. El argumento
-es el número de pines que son tumbados.
-- `score(): int` este método es llamado al final del juego y retorna el score total del
-juego.
+- La clase **Frame** es una clase abstracta y los métodos `add_roll(pins: int)` y `score() -> int`
+son métodos abstractos.
+- Puede agregar los elementos adicionales que considere necesarios para la implementación de la solución.
+- Lo que se verifica en la implementación es lo que hacen los métodos de la clase **Game**, así que 
+tenga en cuenta lo siguiente:
+  - `roll(pins: int)` este método es llamado cada vez que un jugador lanza una bola. El argumento
+  es el número de pines que son tumbados.
+  - `score(): int` este método es llamado al final del juego y retorna el puntaje total del
+  juego.
+- No tiene que implementar clases adicionales que llamen a los métodos de la clase **Game**. 
+  Esto lo haremos luego cuando implementemos las pruebas.
 
 ### Manejo de excepciones
-Para el ejercicio también se requiere que arroje una excepción cuando las reglas de juego
-o cálculo de puntaje no son seguidas. La implementación solo pasará las pruebas si se arroja
-la excepción y se incluye un mensaje con ella.
+El manejo de excepciones hace parte de los requisitos del ejercicio. Por tal motivo, deberá implementar la
+solución teniendo en cuenta que se deben generar excepciones cuando algunas reglas del juego no se cumplan. 
 
-Para este caso se deben manejar los siguientes tipos de excepciones incluidas en python:
+Para este caso se deben generar los siguientes tipos de excepciones incluidas en python:
 
-- ValueError: Cuando los pines de un frame exceden de 10 
-- IndexError: Cuando se hace un lanzamiento extra en un frame 10 que está abierto
-- IndexError: Cuando se agregan más de 3 lanzamientos a un frame 10 que fue strike o spare
-- IndexError: Cuando se calcula el puntaje del juego sin haberlo terminado
+- **ValueError:** Cuando los pines de un frame exceden de 10 
+- **IndexError:** Cuando se hace un lanzamiento extra en un frame 10 que está abierto
+- **IndexError:** Cuando se agregan más de 3 lanzamientos a un frame 10 que fue strike o spare
+- **IndexError:** Cuando se calcula el puntaje del juego sin haberlo terminado
 
-Aunque las excepciones ya vienen en python, se deben arrojar incluyendo mensajes
-significativos para el dominio de la aplicación.
+Aunque las excepciones ya vienen en python, se deben arrojar incluyendo mensajes significativos para el dominio 
+de la aplicación.
+
+## Escenarios de prueba
+En la segunda parte del ejercicio vamos a implementar pruebas unitarias para verificar el funcionamiento de la
+aplicación, particularmente el de la clase **Game**. Para esto, vamos a escribir pruebas para los siguientes
+escenarios:
+
+- Verificar el cálculo del puntaje de un juego terrible donde en todos los lanzamientos no se tumbó ningún pin. 
+- Verificar el cálculo del puntaje de un juego donde en todos los lanzamientos se tumbó un solo pin.
+- Verificar el cálculo del puntaje de un juego donde solo se logró un spare.
+- Verificar el cálculo del puntaje de un juego donde solo se logró un strike.
+- Verificar el cálculo del puntaje de un juego perfecto donde en todos los lanzamientos se logró un strike.
+- Verificar que se arroja una excepción de tipo ValueError en un juego donde los pines de un frame exceden de 10.
+- Verificar que se arroja una excepción de tipo IndexError en un juego donde se hace un lanzamiento extra en un frame 10
+  que está abierto.
+- Verificar que se arroja una excepción de tipo IndexError en un juego donde se hacen más de tres lanzamientos en un
+  frame 10 que fue strike o spare.
+- Verificar que se arroja una excepción de tipo IndexError en un juego donde se trata de calcular el puntaje sin haberlo
+  terminado.
