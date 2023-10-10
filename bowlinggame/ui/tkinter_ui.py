@@ -5,11 +5,10 @@ from customtkinter import CTk, set_appearance_mode
 
 
 class BowlingFrame(Frame):
-    def __init__(self, master=None, number=0, is_total=False, **kwargs):
+    def __init__(self, master=None, number="", is_total=False, **kwargs):
         super().__init__(master, **kwargs)
         self.config(borderwidth=1, relief=SOLID)
-        self.config(padx=0, pady=0)
-        self.config(bg="white")
+        self.config(padx=0, pady=0, bg="white")
 
         if is_total:
             bg = "darkblue"
@@ -18,7 +17,7 @@ class BowlingFrame(Frame):
             bg = "white"
             fg = "black"
 
-        self.frame_label = Label(self, text=str(number))
+        self.frame_label = Label(self, text=number)
         self.frame_label.pack(side=TOP, fill=X)
         self.frame_label.config(borderwidth=1, relief=SOLID, width=5, height=1, bg=bg, fg=fg)
         self.frame_rolls = Label(self, text="")
@@ -40,7 +39,7 @@ class BowlingApp(CTk):
         super().__init__()
         self.add_roll_entry = None
         self.title("Bowling Score Manager")
-        self.geometry("475x120")
+        self.geometry("600x150")
         self.config(padx=10, pady=10)
         self.resizable(False, False)
         self.frames = []
@@ -51,22 +50,19 @@ class BowlingApp(CTk):
 
         l_frame = Label(self, text="Frame:", width=7)
         l_frame.grid(row=0, column=0, padx=1)
-        l_frame.config(foreground="blue")
-        l_frame.config(anchor=W, justify=LEFT)
+        l_frame.config(foreground="blue", anchor=W, justify=LEFT)
 
         l_roll = Label(self, text="Rolls:", width=7)
         l_roll.grid(row=1, column=0, padx=1)
-        l_roll.config(foreground="blue")
-        l_roll.config(anchor=W, justify=LEFT)
+        l_roll.config(foreground="blue", anchor=W, justify=LEFT)
 
         l_score = Label(self, text="Score:", width=7)
         l_score.grid(row=2, column=0, padx=1)
-        l_score.config(foreground="blue")
-        l_score.config(anchor=W, justify=LEFT)
+        l_score.config(foreground="blue", anchor=W, justify=LEFT)
 
         for i in range(1, 13):
             if i < 11:
-                frame = BowlingFrame(self, number=i)
+                frame = BowlingFrame(self, number=str(i))
             elif i == 11:
                 frame = BowlingFrame(self, number="Extra")
             else:
@@ -78,8 +74,7 @@ class BowlingApp(CTk):
     def create_action_panel(self):
         l_add_roll = Label(self, text="Add roll", width=7)
         l_add_roll.grid(row=3, column=0, padx=1, pady=30)
-        l_add_roll.config(fg="blue")
-        l_add_roll.config(anchor=W, justify=LEFT)
+        l_add_roll.config(fg="blue", anchor=W, justify=LEFT)
 
         self.add_roll_entry = Entry(self, width=13, justify=LEFT)
         self.add_roll_entry.grid(row=3, column=1, columnspan=2, pady=30)
@@ -104,14 +99,3 @@ class BowlingApp(CTk):
 
     def load_from_file(self):
         pass
-
-    def update_frames(self, frames):
-        for i, frame in enumerate(frames):
-            self.frames[i].update_rolls(frame.rolls)
-            self.frames[i].update_score(frame.score())
-
-
-if __name__ == "__main__":
-    set_appearance_mode("light")
-    app = BowlingApp()
-    app.mainloop()
