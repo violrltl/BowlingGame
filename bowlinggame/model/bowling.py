@@ -2,6 +2,8 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Optional
 
+from bowlinggame.model.bowling_errors import FramePinsExceededError
+
 
 @dataclass
 class Roll:
@@ -27,10 +29,10 @@ class Frame(ABC):
         return sum(roll.pins for roll in self.rolls)
 
     def is_strike(self):
-        return self.rolls[0].pins == 10
+        return len(self.rolls) > 0 and self.rolls[0].pins == 10
 
     def is_spare(self):
-        return self.rolls[0].pins + self.rolls[1].pins == 10
+        return len(self.rolls) == 2 and self.rolls[0].pins + self.rolls[1].pins == 10
 
     @abstractmethod
     def add_roll(self, pins: int):
@@ -40,6 +42,19 @@ class Frame(ABC):
     def score(self) -> int:
         raise NotImplementedError
 
+    def __str__(self) -> str:
+        if len(self.rolls) == 0:
+            return ""
+        elif len(self.rolls) == 1:
+            if self.is_strike():
+                return "X"
+            else:
+                return f"{self.rolls[0].pins} | "
+        elif len(self.rolls) == 2:
+            if self.is_spare():
+                return f"{self.rolls[0].pins} | /"
+            else:
+                return f"{self.rolls[0].pins} | {self.rolls[1].pins}"
 
 class NormalFrame(Frame):
     def __init__(self):
@@ -47,7 +62,7 @@ class NormalFrame(Frame):
 
     def add_roll(self, pins: int):
         if pins + self.total_pins > 10:
-            raise ValueError("A frame's rolls cannot exceed 10 pins")
+            raise FramePinsExceededError("A frame's rolls cannot exceed 10 pins")
 
         if len(self.rolls) < 2:
             self.rolls.append(Roll(pins))
@@ -57,10 +72,13 @@ class NormalFrame(Frame):
         if self.is_strike():
             if len(self.next_frame.rolls) == 2:
                 points += self.next_frame.total_pins
-            else:
-                points += self.next_frame.rolls[0].pins + self.next_frame.next_frame.rolls[0].pins
+            elif len(self.next_frame.rolls) == 1:
+                points += self.next_frame.rolls[0].pins
+                if len(self.next_frame.next_frame.rolls) > 0:
+                    points += self.next_frame.next_frame.rolls[0].pins
         elif self.is_spare():
-            points += self.next_frame.rolls[0].pins
+            if len(self.next_frame.rolls) > 0:
+                points += self.next_frame.rolls[0].pins
 
         return points
 
@@ -98,11 +116,15 @@ class Game:
         self.roll_count: int = 0
 
     @property
-    def current_frame(self) -> int:
+    def current_frame_index(self) -> int:
         if self.roll_count < (Game.MAX_FRAMES * 2):
             return self.roll_count // 2
         else:
             return Game.MAX_FRAMES - 1
+
+    @property
+    def current_frame(self) -> Frame:
+        return self.frames[self.current_frame_index]
 
     def _init_frames(self):
         frame = NormalFrame()
@@ -119,14 +141,14 @@ class Game:
         self.frames.append(frame)
 
     def roll(self, pins: int):
-        self.frames[self.current_frame].add_roll(pins)
-        if self.frames[self.current_frame].is_strike():
+        self.frames[self.current_frame_index].add_roll(pins)
+        if self.frames[self.current_frame_index].is_strike():
             self.roll_count += 2
         else:
             self.roll_count += 1
 
     def score(self) -> int:
-        if self.current_frame < Game.MAX_FRAMES - 1:
+        if self.current_frame_index < Game.MAX_FRAMES - 1:
             raise IndexError("There are not enough frames to calculate score")
 
         return sum(frame.score() for frame in self.frames)

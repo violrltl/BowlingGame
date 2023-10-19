@@ -1,7 +1,10 @@
-from tkinter import Tk, Frame, Label, Entry
-from tkinter.constants import TOP, X, SOLID, W, LEFT
+from tkinter import Tk, Frame, Label, Entry, messagebox
+from tkinter.constants import TOP, X, SOLID, W, LEFT, END
 from tkinter.ttk import Button
-from customtkinter import CTk, set_appearance_mode
+from customtkinter import CTk
+
+from bowlinggame.model.bowling import Game
+from bowlinggame.model.bowling_errors import FramePinsExceededError
 
 
 class BowlingFrame(Frame):
@@ -33,16 +36,19 @@ class BowlingFrame(Frame):
     def update_score(self, score):
         self.frame_score.config(text=str(score))
 
+    def activate(self):
+        self.frame_label.config(bg="lightgreen")
 
 class BowlingApp(CTk):
-    def __init__(self):
+    def __init__(self, game: Game):
         super().__init__()
         self.add_roll_entry = None
         self.title("Bowling Score Manager")
         self.geometry("600x150")
         self.config(padx=10, pady=10)
         self.resizable(False, False)
-        self.frames = []
+        self.frames: list[BowlingFrame] = []
+        self.game: Game = game
         self.create_frames()
         self.create_action_panel()
 
@@ -70,6 +76,7 @@ class BowlingApp(CTk):
 
             frame.grid(row=0, column=i, rowspan=3, padx=1)
             self.frames.append(frame)
+        self.frames[0].activate()
 
     def create_action_panel(self):
         l_add_roll = Label(self, text="Add roll", width=7)
@@ -78,6 +85,7 @@ class BowlingApp(CTk):
 
         self.add_roll_entry = Entry(self, width=13, justify=LEFT)
         self.add_roll_entry.grid(row=3, column=1, columnspan=2, pady=30)
+        self.add_roll_entry.bind("<Return>", lambda event: self.add_roll())
 
         # add button next to entry
         add_roll_button = Button(self, text="Add", width=5, command=self.add_roll)
@@ -91,11 +99,38 @@ class BowlingApp(CTk):
         reset_button = Button(self, text="Reset", command=self.reset)
         reset_button.grid(row=3, column=11, columnspan=2, pady=30)
 
+        self.bind("<Visibility>", lambda event: self.focus_roll_entry())
+
+    def focus_roll_entry(self):
+        self.add_roll_entry.focus()
+        self.unbind("<Visibility>")
+
     def reset(self):
         pass
 
     def add_roll(self):
-        pass
+        try:
+            roll = int(self.add_roll_entry.get())
+            if roll < 0:
+                message = "Roll must be a positive integer value"
+                messagebox.showwarning(title="Validation error", message=message, parent=self)
+            else:
+                self.game.roll(roll)
+                self.frames[self.game.current_frame_index].activate()
+                self.update_frames()
+        except ValueError:
+            message = "Roll must be an integer value"
+            messagebox.showwarning(title="Validation error", message=message, parent=self)
+        except FramePinsExceededError as err:
+            messagebox.showwarning(title="Warning", message=str(err), parent=self)
+        finally:
+            self.add_roll_entry.select_range(0, END)
+            self.add_roll_entry.focus()
 
     def load_from_file(self):
         pass
+
+    def update_frames(self):
+        for i, frame in enumerate(self.game.frames):
+            self.frames[i].update_rolls(str(frame))
+            self.frames[i].update_score(frame.score())
