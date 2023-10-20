@@ -1,3 +1,4 @@
+
 from customtkinter import set_appearance_mode
 
 from bowlinggame.model.bowling import Game

@@ -1,3 +1,4 @@
+
 from tkinter import Tk, Frame, Label, Entry, messagebox
 from tkinter.constants import TOP, X, SOLID, W, LEFT, END
 from tkinter.ttk import Button
@@ -134,3 +135,15 @@ class BowlingApp(CTk):
         for i, frame in enumerate(self.game.frames):
             self.frames[i].update_rolls(str(frame))
             self.frames[i].update_score(frame.score())
+
+
+from customtkinter import set_appearance_mode
+
+from bowlinggame.model.bowling import Game
+from bowlinggame.ui.tkinter_ui import BowlingApp
+
+if __name__ == "__main__":
+    set_appearance_mode("light")
+    game: Game = Game()
+    app = BowlingApp(game)
+    app.mainloop()
