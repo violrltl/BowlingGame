@@ -107,7 +107,19 @@ class BowlingApp(CTk):
         self.unbind("<Visibility>")
 
     def reset(self):
-        pass
+        def reset(self):
+            self.frames = []
+            self._init_frames()
+            self.roll_count = 0
+
+            self.frames[0].activate()
+            self.frames[0].update_rolls("")
+            self.frames[0].update_score(0)
+
+    for frame in self.frames[1:]:
+        frame.update_rolls("")
+        frame.update_score(0)
+
 
     def add_roll(self):
         try:
@@ -129,7 +141,25 @@ class BowlingApp(CTk):
             self.add_roll_entry.focus()
 
     def load_from_file(self):
-        pass
+        with open(filename, "r") as f:
+        rolls = f.readline().split()
+
+    for i, roll in enumerate(rolls):
+        try:
+            roll = int(roll)
+        except ValueError:
+            if roll == "x":
+                roll = 10
+            elif roll == "/":
+                roll = 10
+            else:
+                raise ValueError("El valor de un roll debe ser un número entero o x o /")
+
+        self.frames[i].add_roll(roll)
+
+    self.roll_count = len(rolls)
+    self.current_frame_index = len(rolls) // 2
+
 
     def update_frames(self):
         for i, frame in enumerate(self.game.frames):
